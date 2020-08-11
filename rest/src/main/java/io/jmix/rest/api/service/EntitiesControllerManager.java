@@ -684,7 +684,7 @@ public class EntitiesControllerManager {
 
     protected FetchPlan findOrCreateResponseView(MetaClass metaClass, String responseView) {
         if (StringUtils.isEmpty(responseView)) {
-            return new FetchPlan(JmixEntity.class, false)
+            return new FetchPlan(JmixEntity.class)
                     .addProperty("id")
                     .addProperty(EntitySerialization.ENTITY_NAME_PROP)
                     .addProperty(EntitySerialization.INSTANCE_NAME_PROP);
