@@ -17,6 +17,7 @@
 package io.jmix.samples.rest.entity.debtor;
 
 
+import io.jmix.core.metamodel.annotation.ModelProperty;
 import io.jmix.samples.rest.entity.StandardEntity;
 
 import javax.persistence.*;
@@ -61,11 +62,11 @@ public class Case extends StandardEntity {
     protected Debtor debtor;
 
     @Transient
-//    @MetaProperty(related = {"test1", "test2"})
+    @ModelProperty
     protected String nonPersistent1;
 
     @Transient
-//    @MetaProperty
+    @ModelProperty
     protected List<Debtor> doubleDebtor;
 
     private static final long serialVersionUID = 5403048066474211978L;
