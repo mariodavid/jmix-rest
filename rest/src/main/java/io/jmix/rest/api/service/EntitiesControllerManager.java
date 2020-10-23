@@ -733,7 +733,6 @@ public class EntitiesControllerManager {
             //noinspection ConstantConditions
             return fetchPlans.builder(metaClass.getJavaClass())
                     .add(metadataTools.getPrimaryKeyName(metaClass))
-                    .addFetchPlan(FetchPlan.INSTANCE_NAME)
                     .build();
         }
 

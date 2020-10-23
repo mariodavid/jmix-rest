@@ -68,6 +68,11 @@
                   fetchPlan="_local"/>
     </fetchPlan>
 
+    <fetchPlan class="io.jmix.samples.rest.entity.multidb.Mem1Customer"
+               name="mem1CustomerWithName">
+        <property name="name"/>
+    </fetchPlan>
+
     <fetchPlan class="io.jmix.samples.rest.entity.driver.ExtDriver"
                extends="_local"
                name="test1">

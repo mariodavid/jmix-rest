@@ -38,13 +38,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EntitiesControllerFT extends AbstractRestControllerFT {
 
-    private String carUuidString;
+    protected String carUuidString;
     private String carDocumentationUuidString;
     private String secondCarUuidString;
     private String colourUuidString;
     private String repairUuidString;
     private String modelUuidString;
-    private String model2UuidString;
+    protected String model2UuidString;
     private String repair2UuidString;
     private String model3UuidString;
     private String driverUuidString;
@@ -680,12 +680,10 @@ class EntitiesControllerFT extends AbstractRestControllerFT {
     }
 
     @Test
-    @Disabled
     void createNewEntityWithoutResponseView() throws Exception {
         Map<String, String> replacements = new HashMap<>();
         replacements.put("$MODEL_ID$", model3UuidString);
         String json = getFileContent("carWithModel.json", replacements);
-
         UUID carId;
         String url = baseUrl + "/entities/ref_Car";
 
@@ -859,8 +857,6 @@ class EntitiesControllerFT extends AbstractRestControllerFT {
     }
 
     @Test
-    //todo create custom data store
-    @Disabled
     void createAndReadNewEntityFromCustomDataStore() throws Exception {
         Map<String, String> replacements = new HashMap<>();
         String json = getFileContent("createMem1Customer.json", replacements);
@@ -886,7 +882,7 @@ class EntitiesControllerFT extends AbstractRestControllerFT {
             assertEquals("Bob", ctx.read("$.name"));
         }
 
-        url = "/entities/ref$Mem1Customer/" + customerId.toString();
+        url = baseUrl + "/entities/ref$Mem1Customer/" + customerId.toString();
         try (CloseableHttpResponse response = sendGet(url, oauthToken, null)) {
             assertEquals(HttpStatus.SC_OK, statusCode(response));
             ReadContext ctx = parseResponse(response);
@@ -929,55 +925,6 @@ class EntitiesControllerFT extends AbstractRestControllerFT {
             assertEquals("Modified vin", vin);
             Object modelId = rs.getObject("MODEL_ID");
             assertEquals(model2UuidString, modelId);
-        }
-    }
-
-    @Test
-    @Disabled
-        //todo move to another test with optimisticLockingEnabled=true
-    void updateCarWithVersion() throws Exception {
-        try {
-            Map<String, String> replacements = new HashMap<>();
-            replacements.put("$CAR_ID$", carUuidString);
-            replacements.put("$MODEL_ID$", model2UuidString);
-            String json = getFileContent("updateCar.json", replacements);
-
-            String url = baseUrl + "/entities/ref_Car/" + carUuidString;
-            Map<String, String> params = new HashMap<>();
-            params.put("responseView", "carWithModel");
-
-            try (CloseableHttpResponse response = sendPut(url, oauthToken, json, params)) {
-                assertEquals(HttpStatus.SC_OK, statusCode(response));
-
-                ReadContext ctx = parseResponse(response);
-                assertEquals("ref_Car", ctx.read("$._entityName"));
-                assertEquals(carUuidString, ctx.read("$.id"));
-                assertEquals(model2UuidString, ctx.read("$.model.id"));
-                assertNotNull(ctx.read("$.updateTs"));
-                assertNotNull(ctx.read("$.version"));
-
-            }
-
-            json = getFileContent("updateCarWithVersion.json", replacements);
-            try (CloseableHttpResponse response = sendPut(url, oauthToken, json, null)) {
-                assertEquals(HttpStatus.SC_BAD_REQUEST, statusCode(response));
-
-                ReadContext ctx = parseResponse(response);
-                assertEquals("Optimistic lock", ctx.read("$.error"));
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement("select VIN, MODEL_ID from REF_CAR where ID = ?")) {
-                stmt.setObject(1, UUID.fromString(carUuidString));
-                ResultSet rs = stmt.executeQuery();
-                assertTrue(rs.next());
-                String vin = rs.getString("VIN");
-                assertEquals("Modified vin", vin);
-                Object modelId = rs.getObject("MODEL_ID");
-                assertEquals(model2UuidString, modelId);
-            }
-        } finally {
-//            Connectors.jmx(WebConfigStorageJmxService.class)
-//                    .setAppProperty("cuba.rest.optimisticLockingEnabled", "false");
         }
     }
 
