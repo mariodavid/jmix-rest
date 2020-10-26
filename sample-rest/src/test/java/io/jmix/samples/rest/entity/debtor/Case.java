@@ -17,6 +17,7 @@
 package io.jmix.samples.rest.entity.debtor;
 
 
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.ModelProperty;
 import io.jmix.samples.rest.entity.StandardEntity;
 
@@ -63,6 +64,7 @@ public class Case extends StandardEntity {
 
     @Transient
     @ModelProperty
+    @DependsOnProperties({"test1", "test2"})
     protected String nonPersistent1;
 
     @Transient
