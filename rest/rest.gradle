@@ -25,6 +25,7 @@ dependencies {
 
     api 'io.jmix.core:jmix-core'
     api 'io.jmix.data:jmix-data' // TODO should not depend on data
+    api 'io.jmix.security:jmix-security'
     api 'io.jmix.sessions:jmix-sessions'
 
     api 'org.springframework.security:spring-security-core'

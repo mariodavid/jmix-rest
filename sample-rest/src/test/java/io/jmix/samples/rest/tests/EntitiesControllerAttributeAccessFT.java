@@ -10,7 +10,6 @@ import com.jayway.jsonpath.ReadContext;
 import io.jmix.core.security.impl.CoreUser;
 import io.jmix.samples.rest.security.FullAccessRole;
 import io.jmix.security.role.assignment.RoleAssignment;
-import io.jmix.securitydata.entity.RoleAssignmentEntity;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -533,9 +532,6 @@ public class EntitiesControllerAttributeAccessFT extends AbstractRestControllerF
 
         CoreUser driverRead = new CoreUser(driverReadUserLogin, "{noop}" + driverReadUserPassword, driverReadUserLogin.toLowerCase());
         userRepository.addUser(driverRead);
-        RoleAssignmentEntity roleAssignmentEntity = metadata.create(RoleAssignmentEntity.class);
-        roleAssignmentEntity.setRoleCode("system-full-access");
-        roleAssignmentEntity.setUsername(driverRead.getUsername());
         roleAssignmentProvider.addAssignment(new RoleAssignment(driverRead.getUsername(), FullAccessRole.NAME));
     }
 
