@@ -17,22 +17,33 @@
 package io.jmix.samples.rest
 
 import groovy.sql.Sql
+import io.jmix.core.CoreConfiguration
 import io.jmix.core.Metadata
-import io.jmix.core.security.impl.CoreUser
+import io.jmix.core.security.CoreUser
 import io.jmix.core.security.InMemoryUserRepository
+import io.jmix.data.DataConfiguration
+import io.jmix.rest.RestConfiguration
 import io.jmix.samples.rest.api.DataSet
 import io.jmix.samples.rest.security.FullAccessRole
+import io.jmix.security.SecurityConfiguration
 import io.jmix.security.role.assignment.InMemoryRoleAssignmentProvider
 import io.jmix.security.role.assignment.RoleAssignment
 import io.jmix.securitydata.entity.RoleAssignmentEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 import static io.jmix.samples.rest.DbUtils.getSql
 import static io.jmix.samples.rest.RestSpecsUtils.getAuthToken
 
+@ContextConfiguration(classes = [
+        CoreConfiguration.class,
+        DataConfiguration.class,
+        SecurityConfiguration.class,
+        RestConfiguration.class,
+        JmixRestTestConfiguration.class])
 @SpringBootTest(classes = SampleRestApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RestSpec extends Specification {
 
