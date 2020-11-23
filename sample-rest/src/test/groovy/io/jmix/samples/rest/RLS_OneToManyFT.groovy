@@ -52,7 +52,6 @@ class RLS_OneToManyFT extends RestSpec {
 
     void cleanup() {
         userRepository.removeUser(user)
-        roleAssignmentProvider.removeAssignments(user.name)
     }
 
     def """Store entity with same composition as in the database, hidden elements should not be deleted"""() {

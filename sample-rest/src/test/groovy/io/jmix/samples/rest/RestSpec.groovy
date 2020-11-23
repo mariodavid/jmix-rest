@@ -26,7 +26,8 @@ import io.jmix.rest.RestConfiguration
 import io.jmix.samples.rest.api.DataSet
 import io.jmix.samples.rest.security.FullAccessRole
 import io.jmix.security.SecurityConfiguration
-import io.jmix.security.role.assignment.InMemoryRoleAssignmentProvider
+import io.jmix.security.authentication.RoleGrantedAuthority
+import io.jmix.security.role.RoleRepository
 import io.jmix.security.role.assignment.RoleAssignment
 import io.jmix.securitydata.entity.RoleAssignmentEntity
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,7 +49,7 @@ import static io.jmix.samples.rest.RestSpecsUtils.getAuthToken
 class RestSpec extends Specification {
 
     @LocalServerPort
-    private int port
+    int port
 
     @Autowired
     InMemoryUserRepository userRepository
@@ -57,7 +58,7 @@ class RestSpec extends Specification {
     Metadata metadata
 
     @Autowired
-    InMemoryRoleAssignmentProvider roleAssignmentProvider
+    RoleRepository roleRepository
 
     public DataSet dirtyData = new DataSet()
     public Sql sql
@@ -69,13 +70,9 @@ class RestSpec extends Specification {
     CoreUser admin
 
     void setup() {
-        admin = new CoreUser(userLogin, "{noop}$userPassword", "Admin")
+        admin = new CoreUser(userLogin, "{noop}$userPassword", "Admin",
+                Collections.singleton(new RoleGrantedAuthority(roleRepository.getRoleByCode(FullAccessRole.NAME))))
         userRepository.addUser(admin)
-
-        RoleAssignmentEntity roleAssignmentEntity = metadata.create(RoleAssignmentEntity.class)
-        roleAssignmentEntity.setRoleCode("system-full-access")
-        roleAssignmentEntity.setUsername(admin.getUsername())
-        roleAssignmentProvider.addAssignment(new RoleAssignment(admin.getUsername(), FullAccessRole.NAME))
 
         baseUrl = "http://localhost:" + port + "/rest"
         RestSpecsUtils.setBasePort(port)
