@@ -20,7 +20,7 @@ import groovy.sql.Sql
 import io.jmix.core.CoreConfiguration
 import io.jmix.core.security.InMemoryUserRepository
 import io.jmix.data.DataConfiguration
-import io.jmix.dataeclipselink.DataEclipselinkConfiguration
+import io.jmix.eclipselink.EclipselinkConfiguration
 import io.jmix.rest.RestConfiguration
 import io.jmix.samples.rest.SampleRestApplication
 import io.jmix.samples.rest.security.FullAccessRole
@@ -42,7 +42,7 @@ import static test_support.RestSpecsUtils.getAuthToken
 @ContextConfiguration(classes = [
         CoreConfiguration.class,
         DataConfiguration.class,
-        DataEclipselinkConfiguration.class,
+        EclipselinkConfiguration.class,
         SecurityConfiguration.class,
         RestConfiguration.class,
         JmixRestTestConfiguration.class])
