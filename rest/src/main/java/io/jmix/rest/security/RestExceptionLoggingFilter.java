@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.rest.security.filter;
+package io.jmix.rest.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.rest.api.exception.ErrorInfo;
