@@ -51,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.jmix.core.EntitySerializationOption.*;
 
@@ -447,25 +448,20 @@ public class EntitiesControllerManager {
 
         entitiesJson = restControllerUtils.transformJsonIfRequired(entityName, modelVersion, JsonTransformationDirection.FROM_VERSION, entitiesJson);
 
-        Collection<Object> mainCollectionEntity = new ArrayList<>();
         JsonArray entitiesJsonArray = new JsonParser().parse(entitiesJson).getAsJsonArray();
 
+        List<Object> mainCollectionEntity = new ArrayList<>(createEntitiesFromJson(metaClass, entitiesJsonArray));
+
         if (restProperties.isResponseFetchPlanEnabled() && responseView != null) {
-            for (JsonElement jsonElement : entitiesJsonArray) {
-                Object mainEntity = createEntityFromJson(metaClass, jsonElement.toString());
-                if (!entityStates.isLoadedWithFetchPlan(mainEntity, responseView)) {
+            for (Object entity : mainCollectionEntity) {
+                if (!entityStates.isLoadedWithFetchPlan(entity, responseView)) {
                     LoadContext loadContext = new LoadContext<>(metaClass).setFetchPlan(restControllerUtils.getView(metaClass, responseView));
-                    loadContext.setId(EntityValues.getId(mainEntity));
-                    mainEntity = dataManager.load(loadContext);
+                    loadContext.setId(EntityValues.getId(entity));
+                    mainCollectionEntity.set(mainCollectionEntity.indexOf(entity), dataManager.load(loadContext));
                 }
-                mainCollectionEntity.add(mainEntity);
-            }
-        } else {
-            for (JsonElement jsonElement : entitiesJsonArray) {
-                Object mainEntity = createEntityFromJson(metaClass, jsonElement.toString());
-                mainCollectionEntity.add(mainEntity);
             }
         }
+
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(request.getRequestURL().toString()).buildAndExpand();
         String bodyJson = createEntitiesJson(mainCollectionEntity, metaClass, responseView, modelVersion);
 
@@ -491,6 +487,35 @@ public class EntitiesControllerManager {
 
         //if many entities were created (because of @Composition references) we must find the main entity
         return getMainEntity(importedEntities, metaClass);
+    }
+
+    protected List<Object> createEntitiesFromJson(MetaClass metaClass, JsonArray entitiesJsonArray) {
+        Map<Object, EntityImportPlan> objectEntityImportPlanMap = new HashMap<>();
+        Object entity;
+        EntityImportPlan entityImportPlan;
+        try {
+            for (JsonElement element : entitiesJsonArray) {
+                entity = entitySerialization.entityFromJson(element.toString(), metaClass);
+                entityImportPlan = entityImportPlanJsonBuilder.buildFromJson(element.toString(), metaClass);
+                objectEntityImportPlanMap.put(entity, entityImportPlan);
+            }
+        } catch (Exception e) {
+            throw new RestAPIException("Cannot deserialize an entity from JSON", "", HttpStatus.BAD_REQUEST, e);
+        }
+        Collection<Object> importedEntities;
+        SaveContext saveContext = new SaveContext();
+
+        try {
+            for (Map.Entry<Object, EntityImportPlan> entry : objectEntityImportPlanMap.entrySet()) {
+                entityImportExport.fillSaveContextWithEntity(entry.getKey(), entry.getValue(), false, saveContext);
+            }
+            importedEntities = dataManager.save(saveContext);
+
+        } catch (Exception e) {
+            throw new RestAPIException("Entity creation failed", e.getMessage(), HttpStatus.BAD_REQUEST, e);
+        }
+
+        return importedEntities.stream().filter(e -> isMainEntity(e, metaClass)).collect(Collectors.toList());
     }
 
     public ResponseInfo updateEntity(String entityJson,
@@ -704,6 +729,13 @@ public class EntitiesControllerManager {
             mainEntity = importedEntities.iterator().next();
         }
         return mainEntity;
+    }
+
+    protected boolean isMainEntity(Object entity, MetaClass metaClass) {
+        if (entity == null || metaClass == null) {
+            return false;
+        }
+        return metadata.getClass(entity).equals(metaClass);
     }
 
     /**
