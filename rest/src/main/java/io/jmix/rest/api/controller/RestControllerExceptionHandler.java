@@ -42,7 +42,8 @@ import javax.persistence.OptimisticLockException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import java.time.LocalDate;
+import java.time.*;
+import java.time.temporal.Temporal;
 import java.util.*;
 
 @ControllerAdvice("io.jmix.rest.api.controller")
@@ -51,7 +52,11 @@ public class RestControllerExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(RestControllerExceptionHandler.class);
 
     protected static final Collection<Class> SERIALIZABLE_INVALID_VALUE_TYPES =
-            Collections.unmodifiableList(Arrays.asList(String.class, Date.class, LocalDate.class, Number.class, Enum.class, UUID.class));
+            Collections.unmodifiableList(
+                    Arrays.asList(
+                            String.class, Date.class, LocalDate.class,  LocalDateTime.class, OffsetDateTime.class,
+                            LocalTime.class, OffsetTime.class, Number.class, Enum.class, UUID.class
+                    ));
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
@@ -163,7 +168,7 @@ public class RestControllerExceptionHandler {
                     }
                 }
                 if (serializable) {
-                    if (invalidValue instanceof Date || invalidValue instanceof LocalDate) {
+                    if (invalidValue instanceof Temporal || invalidValue instanceof Date) {
                         Datatype datatype = getDatatype(violation);
                         info.setInvalidValue(datatype.format(invalidValue, currentAuthentication.getLocale()));
                     } else {
