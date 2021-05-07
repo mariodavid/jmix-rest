@@ -507,7 +507,7 @@ public class EntitiesControllerManager {
 
         try {
             for (Map.Entry<Object, EntityImportPlan> entry : objectEntityImportPlanMap.entrySet()) {
-                entityImportExport.fillSaveContextWithEntity(entry.getKey(), entry.getValue(), false, saveContext);
+                entityImportExport.importEntityIntoSaveContext(saveContext, entry.getKey(), entry.getValue(), false);
             }
             importedEntities = dataManager.save(saveContext);
 
