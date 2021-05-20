@@ -44,6 +44,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Component("rest_QueriesControllerManager")
@@ -289,6 +290,7 @@ public class QueriesControllerManager {
                 }
             }
         }
+        if (LocalDate.class == clazz) {return datatypeRegistry.get(LocalDate.class).parse(value);}
         if (BigDecimal.class == clazz) return datatypeRegistry.get(BigDecimal.class).parse(value);
         if (Boolean.class == clazz || Boolean.TYPE == clazz) return datatypeRegistry.get(Boolean.class).parse(value);
         if (Long.class == clazz || Long.TYPE == clazz) return datatypeRegistry.get(Long.class).parse(value);
